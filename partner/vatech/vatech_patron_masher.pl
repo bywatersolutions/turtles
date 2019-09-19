@@ -130,9 +130,11 @@ my @borrower_fields = qw /cardnumber          surname
   categorycode        userid
   /;
 
-my $csv =  Text::CSV_XS->new( { binary => 1, sep_char => $delimiter{$csv_delim} } );
+my $csv =
+  Text::CSV_XS->new( { binary => 1, sep_char => $delimiter{$csv_delim} } );
 open my $input_file, '<', $input_filename;
 $csv->column_names( $csv->getline($input_file) );
+
 #$debug and print Dumper( $csv->column_names() );
 open my $output_file, '>:utf8', $output_filename;
 for my $k ( 0 .. scalar(@borrower_fields) - 1 ) {
@@ -144,8 +146,9 @@ RECORD:
 while ( my $patronline = $csv->getline_hr($input_file) ) {
     last RECORD if ( $debug && $i > 10 );
     $i++;
-#    print '.'    unless ( $i % 10 );
-#    print "\r$i" unless ( $i % 100 );
+
+    #    print '.'    unless ( $i % 10 );
+    #    print "\r$i" unless ( $i % 100 );
     my %record;
     my $addedcode = $NULL_STRING;
 
@@ -154,7 +157,8 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
     }
 
     foreach my $map (@field_mapping) {
-#        $debug and print Dumper($map);
+
+        #        $debug and print Dumper($map);
         if (   ( defined $patronline->{ $map->{'column'} } )
             && ( $patronline->{ $map->{'column'} } ne $NULL_STRING ) )
         {
@@ -172,7 +176,8 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
             my $data = $patronline->{ $map->{'column'} };
             $data =~ s/^\s+//g;
             $data =~ s/\s+$//g;
-#            $debug and print "$map->{'column'}: $data\n";
+
+            #            $debug and print "$map->{'column'}: $data\n";
 
             if ($tool) {
                 if ( $tool eq 'phone' ) {
@@ -248,18 +253,19 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
     }
 
     # New patron defaults
-    $borrower{branchcode} ||= 'newman';
+    $borrower{branchcode}   ||= 'newman';
     $borrower{dateenrolled} ||= DateTime->now->ymd;
 
     next RECORD if ( !exists $record{categorycode} );
 
     # Needs to be updated for *all* patrons, both existing and new
-    $record{dateexpiry} = Koha::Patron::Categories->find($record{categorycode})->get_expiry_date()
+    $record{dateexpiry} =
+      Koha::Patron::Categories->find( $record{categorycode} )->get_expiry_date()
 
-    #assign userid from email if email is vt.edu
-    if ( ($record{email}) && ($record{email} =~ m/vt\.edu/ ) ) {
-       my ($user_id, $ignoreme) = split(/@/,$record{email},2);
-       $record{userid} = $user_id;
+      #assign userid from email if email is vt.edu
+      if ( ( $record{email} ) && ( $record{email} =~ m/vt\.edu/ ) ) {
+        my ( $user_id, $ignoreme ) = split( /@/, $record{email}, 2 );
+        $record{userid} = $user_id;
     }
 
     for $k ( 0 .. scalar(@borrower_fields) - 1 ) {
