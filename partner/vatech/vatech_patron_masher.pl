@@ -232,10 +232,31 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
 #    $dt =~ s/T00:00:00//;
 #    $record{dateexpiry} = $dt;
 
+    my $patron = Koha::Patrons->find( { cardnumber => $record{cardnumber} } );
+    if ($patron) {
+
+        #alwasy preserve branchcode found in Koha for patron
+        $record{branchcode} = $patron->branchcode;
+
+        #if patron is libstaff keep categorycode if not use what's in file
+        if ( $patron->categorycode eq 'LIBSTAFF' ) {
+            $borrower{categorycode} = $Apatron->categorycode;
+        }
+
+        # Always retain existing dateenrolled
+        $borrower{dateenrolled} = $patron->dateenrolled;
+    }
+
+    # New patron defaults
+    $borrower{branchcode} ||= 'newman';
+    $borrower{dateenrolled} ||= DateTime->now->ymd;
+
     next RECORD if ( !exists $record{categorycode} );
 
+    # Needs to be updated for *all* patrons, both existing and new
+    $record{dateexpiry} = Koha::Patron::Categories->find($record{categorycode})->get_expiry_date()
 
-#assign userid from email if email is vt.edu
+    #assign userid from email if email is vt.edu
     if ( ($record{email}) && ($record{email} =~ m/vt\.edu/ ) ) {
        my ($user_id, $ignoreme) = split(/@/,$record{email},2);
        $record{userid} = $user_id;
