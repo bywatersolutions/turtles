@@ -117,7 +117,8 @@ foreach my $map (@static) {
       };
 }
 
-my @borrower_fields = qw /cardnumber          surname
+my @borrower_fields = qw /
+  cardnumber          surname
   firstname           sort2
   sort1
   address             address2
@@ -130,8 +131,7 @@ my @borrower_fields = qw /cardnumber          surname
   categorycode        userid
   /;
 
-my $csv =
-  Text::CSV_XS->new( { binary => 1, sep_char => $delimiter{$csv_delim} } );
+my $csv = Text::CSV_XS->new( { binary => 1, sep_char => $delimiter{$csv_delim} } );
 open my $input_file, '<', $input_filename;
 $csv->column_names( $csv->getline($input_file) );
 
@@ -283,7 +283,7 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
     }
     if ($addedcode) {
         $addedcode =~ s/^,//;
-        print {$output_file} '"' . "$addedcode" . '"';
+        print {$output_file} qq{"$addedcode"};
     }
     print {$output_file} "\n";
     $written++;
