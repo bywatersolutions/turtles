@@ -245,16 +245,16 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
 
         #if patron is libstaff keep categorycode if not use what's in file
         if ( $patron->categorycode eq 'LIBSTAFF' ) {
-            $borrower{categorycode} = $patron->categorycode;
+            $record{categorycode} = $patron->categorycode;
         }
 
         # Always retain existing dateenrolled
-        $borrower{dateenrolled} = $patron->dateenrolled;
+        $record{dateenrolled} = $patron->dateenrolled;
     }
 
     # New patron defaults
-    $borrower{branchcode}   ||= 'newman';
-    $borrower{dateenrolled} ||= DateTime->now->ymd;
+    $record{branchcode}   ||= 'newman';
+    $record{dateenrolled} ||= DateTime->now->ymd;
 
     next RECORD if ( !exists $record{categorycode} );
 
