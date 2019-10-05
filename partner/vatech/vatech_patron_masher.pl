@@ -245,7 +245,7 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
 
         #if patron is libstaff keep categorycode if not use what's in file
         if ( $patron->categorycode eq 'LIBSTAFF' ) {
-            $borrower{categorycode} = $Apatron->categorycode;
+            $borrower{categorycode} = $patron->categorycode;
         }
 
         # Always retain existing dateenrolled
