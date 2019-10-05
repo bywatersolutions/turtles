@@ -52,6 +52,7 @@ use English qw( -no_match_vars );
 use Getopt::Long;
 use Readonly;
 use Text::CSV_XS;
+use Koha::Patrons;
 
 local $OUTPUT_AUTOFLUSH = 1;
 Readonly my $NULL_STRING => q{};
