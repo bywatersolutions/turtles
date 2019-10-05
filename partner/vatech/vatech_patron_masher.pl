@@ -263,6 +263,10 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
     # Needs to be updated for *all* patrons, both existing and new
     $record{dateexpiry} =
       Koha::Patron::Categories->find( $record{categorycode} )->get_expiry_date();
+#removing the hour from timestamp returned by get_expiry_date
+   if ($record{dateexpiry} =~ m/\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d/) {
+        $record{dateexpiry} =~ s/(\d\d\d\d-\d\d-\d\d)T\d\d:\d\d:\d\d/$1/;
+    }
 
       #assign userid from email if email is vt.edu
       if ( ( $record{email} ) && ( $record{email} =~ m/vt\.edu/ ) ) {
