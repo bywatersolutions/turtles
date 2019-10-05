@@ -260,7 +260,7 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
 
     # Needs to be updated for *all* patrons, both existing and new
     $record{dateexpiry} =
-      Koha::Patron::Categories->find( $record{categorycode} )->get_expiry_date()
+      Koha::Patron::Categories->find( $record{categorycode} )->get_expiry_date();
 
       #assign userid from email if email is vt.edu
       if ( ( $record{email} ) && ( $record{email} =~ m/vt\.edu/ ) ) {
