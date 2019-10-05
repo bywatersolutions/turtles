@@ -119,7 +119,9 @@ foreach my $map (@static) {
 
 my @borrower_fields = qw /
   cardnumber          surname
-  firstname           sort2
+  firstname           branchcode
+  categorycode        dateenrolled
+  dateexpiry          sort2
   sort1
   address             address2
   city                state
@@ -127,8 +129,7 @@ my @borrower_fields = qw /
   email               phone
   B_address           B_address2
   B_city              B_state
-  B_zipcode
-  categorycode        userid
+  B_zipcode           userid
   /;
 
 my $csv = Text::CSV_XS->new( { binary => 1, sep_char => $delimiter{$csv_delim} } );
