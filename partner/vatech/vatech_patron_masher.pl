@@ -285,6 +285,7 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
     }
     if (!$record{userid}) {
         print "Skipping this record ($record{cardnumber}) as the email is not vt.edu address\n";
+        $problem++;
         next RECORD;
     }
           
@@ -294,6 +295,7 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
         if ($patron->cardnumber ne $record{cardnumber} ) {
          my $existingcard = $patron->cardnumber;
          print "skipping this patron with userid: $record{userid} cardnumber:$record{cardnumber} - this userid exists in Koha but with different cardnumber $existingcard\n";
+         $problem++;
          next RECORD;
         }
 
@@ -348,5 +350,12 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
 
 close $input_file;
 close $output_file;
+
+print << "END_REPORT";
+
+$i patron records read.
+$problem records skipped.
+$written records mashed.
+END_REPORT
 
 exit;
