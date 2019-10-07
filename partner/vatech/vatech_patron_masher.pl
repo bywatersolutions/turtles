@@ -240,8 +240,24 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
 #    $dt =~ s/T00:00:00//;
 #    $record{dateexpiry} = $dt;
 
-    my $patron = Koha::Patrons->find( { cardnumber => $record{cardnumber} } );
+    #assign userid from email if email is vt.edu
+    if ( ( $record{email} ) && ( $record{email} =~ m/vt\.edu/ ) ) {
+        my ( $user_id, $ignoreme ) = split( /@/, $record{email}, 2 );
+        $record{userid} = $user_id;
+    }
+    if (!$record{userid}) {
+        print "Skipping this record ($record{cardnumber}) as the email is not vt.edu address\n";
+        next RECORD;
+    }
+          
+    my $patron = Koha::Patrons->find( { userid => $record{userid} } );
     if ($patron) {
+        #check to see if the cardnumber matches existing Koha cardnumber for this user. if not skip this user and report it.
+        if ($patron->cardnumber ne $record{cardnumber} ) {
+         my $existingcard = $patron->cardnumber;
+         print "skipping this patron with userid: $record{userid} cardnumber:$record{cardnumber} - this userid exists in Koha but with different cardnumber $existingcard\n";
+         next RECORD;
+        }
 
         #alwasy preserve branchcode found in Koha for patron
         $record{branchcode} = $patron->branchcode;
@@ -270,13 +286,7 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
       #removing the hour from timestamp returned by get_expiry_date
       $record{dateexpiry} =~ s/T\d\d:\d\d:\d\d//;
 
-      #assign userid from email if email is vt.edu
-      if ( ( $record{email} ) && ( $record{email} =~ m/vt\.edu/ ) ) {
-        my ( $user_id, $ignoreme ) = split( /@/, $record{email}, 2 );
-        $record{userid} = $user_id;
-    }
-
-    for $k ( 0 .. scalar(@borrower_fields) - 1 ) {
+  for $k ( 0 .. scalar(@borrower_fields) - 1 ) {
         if ( defined $record{ $borrower_fields[$k] } ) {
             $record{ $borrower_fields[$k] } =~ s/\"/'/g;
             if ( $record{ $borrower_fields[$k] } =~ /,/ ) {
