@@ -261,7 +261,7 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
     # New patron defaults
     $record{branchcode}   ||= 'newman';
     $record{dateenrolled} ||= DateTime->now->ymd;
-    $record{privacy_guarantor_checkouts} ||= "0"
+    $record{privacy_guarantor_checkouts} ||= "0";
     next RECORD if ( !exists $record{categorycode} );
 
     # Needs to be updated for *all* patrons, both existing and new
