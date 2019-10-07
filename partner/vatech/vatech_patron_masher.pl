@@ -131,6 +131,7 @@ my @borrower_fields = qw /
   B_address           B_address2
   B_city              B_state
   B_zipcode           userid
+  privacy_guarantor_checkouts
   /;
 
 my $csv = Text::CSV_XS->new( { binary => 1, sep_char => $delimiter{$csv_delim} } );
@@ -252,12 +253,15 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
 
         # Always retain existing dateenrolled
         $record{dateenrolled} = $patron->dateenrolled;
+        
+        #adding in check for privacy_guarantor_checkouts to avoid 'warn' during import
+        $record{privacy_guarantor_checkouts} = $patron->privacy_guarantor_checkouts;
     }
 
     # New patron defaults
     $record{branchcode}   ||= 'newman';
     $record{dateenrolled} ||= DateTime->now->ymd;
-
+    $record{privacy_guarantor_checkouts} ||= "0"
     next RECORD if ( !exists $record{categorycode} );
 
     # Needs to be updated for *all* patrons, both existing and new
@@ -273,7 +277,7 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
     }
 
     for $k ( 0 .. scalar(@borrower_fields) - 1 ) {
-        if ( $record{ $borrower_fields[$k] } ) {
+        if ( defined $record{ $borrower_fields[$k] } ) {
             $record{ $borrower_fields[$k] } =~ s/\"/'/g;
             if ( $record{ $borrower_fields[$k] } =~ /,/ ) {
                 print {$output_file} '"'
