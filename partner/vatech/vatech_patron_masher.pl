@@ -8,11 +8,49 @@
 #  edited:
 #     8.23.2012 Joy Nelson -added Notes for patron attribute format in runtime options
 #     04.10.2018 Joy Nelson - used for vatech banner import
+#     This script will take an incoming pipe delimieted| file and rename the columns.  
+#     It will also do the following:
+#       check for the existence of a currently existing patron and kick them out if they are in Koha with a different cardnumber
+#       if cardnumber and userid match from file to Koha it will pull the patrons: dateenrolled, branchcode and categorycode (if LIBSTAFF)
+#           and put that in the 'mashed borrower' file.
+#       it will calculate a new expiration date for all patrons as well Based on their categorycode configuration in Koha.
 #
+#    This is how the current script should be run - sending any output to a log file
+#     perl path/to/file/vatech_patron_masher.pl 
+#        --in=/whereever/the/incomingfile/islocated/ORIG_FILE.csv 
+#        --out=/wherever/youput/thefiletobeimported/MASHED_FILENAME.csv 
+#        --static=sort2:CONFIDENTIAL 
+#        --col="STUDENT ID:cardnumber" 
+#        --col="STUDENT ID:userid" 
+#        --col="LAST NAME:surname" 
+#        --col="FIRST NAME:firstname" 
+#        --col="MIDDLE NAME:firstname+" 
+#        --col="SUFFIX NAME:surname+" 
+#        --col=ENROLLED:sort1 
+#        --col=CONTACT_ADDRESS_LINE1:address 
+#        --col=CONTACT_ADDRESS_LINE2:address2 
+#        --col=CONTACT_CITY:city 
+#        --col=CONTACT_STATE:state 
+#        --col=CONTACT_ZIPCODE:zipcode 
+#        --col=CONTACT_FOREIGN_STATE:country 
+#        --col=CONTACT_PHONE:phone 
+#        --col=PERMANENT_ADDRESS_LINE1:B_address 
+#        --col=PERMANENT_ADDRESS_LINE2:B_address2 
+#        --col=PERMANENT_CITY:B_city 
+#        --col=PERMANENT_STATE:B_state 
+#        --col=PERMANENT_ZIPCODE:B_zipcode 
+#        --col=PERMANENT_FOREIGN_STATE:B_country 
+#        --col=PERMANENT_PHONE:B_phone 
+#        --col=STUDENT_TYPE:categorycode 
+#        --col="EMAIL ADDRESS:email" 
+#        --col=MAJOR:EXT:STUDENTDEP 
+#        --col="WHOLE RECORD CONFIDENTIAL IND:EXT:CONF" > /path/to/file/Patron_mashing.log
+#
+#        the log should be mailed to someone at Virginia Tech for review same as the import scripts.
 #---------------------------------
 #
 # EXPECTS:
-#   -file of CSV-delimited patron records
+#   -file of pipe-delimited patron records
 #
 # DOES:
 #   -nothing
@@ -303,6 +341,7 @@ while ( my $patronline = $csv->getline_hr($input_file) ) {
         $addedcode =~ s/^,//;
         print {$output_file} qq{"$addedcode"};
     }
+    
     print {$output_file} "\n";
     $written++;
 }
